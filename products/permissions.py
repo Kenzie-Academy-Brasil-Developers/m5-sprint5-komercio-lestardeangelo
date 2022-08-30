@@ -1,28 +1,12 @@
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.views import Request
-from rest_framework.permissions import BasePermission
 
 
-class IsAuthenticatedSellerPermission(BasePermission):
+class IsSeller(BasePermission):
     def has_permission(self, request: Request, _):
+        if request.method in SAFE_METHODS:
+            return True
 
-        if request.method == "POST":
-
-            return request.user.is_authenticated and request.user.is_seller
-
-        return True
-
-
-class IsAuthenticatedOwnerSellerPermission(BasePermission):
-    def has_permission(self, request: Request, _):
-        if request.method == "PATCH":
-
-            return request.user.is_authenticated and request.user.is_seller
-
-        return True
-
-    def has_object_permission(self, request: Request, _, obj):
-        if request.method == "PATCH":
-
-            return request.user.is_authenticated and obj.user == request.user
-
-        return True
+        return bool(
+            request.user and request.user.is_authenticated and request.user.is_seller
+        )

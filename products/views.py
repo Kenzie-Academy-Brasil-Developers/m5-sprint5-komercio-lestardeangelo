@@ -1,36 +1,37 @@
+from django.db import IntegrityError
+from accounts.models import Account
 from core.mixins import SerializerByMethodMixin
-from rest_framework import authentication, generics
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
+from rest_framework.views import Response, status
 
-from .models import Product
-from .permissions import (IsAuthenticatedOwnerSellerPermission,
-                          IsAuthenticatedSellerPermission)
-from .serializers import ProductCreateSerializer, ProductListSerializer
+from products.models import Product
+from products.permissions import IsSeller
+from products.serializers import CreateProductSerializer, ListProductSerializer
 
 
-class ProductsView(SerializerByMethodMixin, generics.ListCreateAPIView):
-
+class ProductView(SerializerByMethodMixin, ListCreateAPIView):
     queryset = Product.objects.all()
 
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [IsAuthenticatedSellerPermission]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsSeller]
 
     serializer_map = {
-        "GET": ProductListSerializer,
-        "POST": ProductCreateSerializer,
+        "GET": ListProductSerializer,
+        "POST": CreateProductSerializer,
     }
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def perform_create(self, serializer: CreateProductSerializer):
+        serializer.save(seller=self.request.user)
 
 
-class ProductIdView(SerializerByMethodMixin, generics.RetrieveUpdateAPIView):
-
+class ProductIdView(SerializerByMethodMixin, RetrieveUpdateAPIView):
     queryset = Product.objects.all()
 
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [IsAuthenticatedOwnerSellerPermission]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsSeller]
 
     serializer_map = {
-        "GET": ProductListSerializer,
-        "PATCH": ProductCreateSerializer,
+        "GET": ListProductSerializer,
+        "PATCH": CreateProductSerializer,
     }
