@@ -1,0 +1,1 @@
+web: gunicorn komercio.wsgi --log-level debug

@@ -1,37 +1,35 @@
-from django.db import IntegrityError
-from accounts.models import Account
-from core.mixins import SerializerByMethodMixin
+from rest_framework import generics
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
-from rest_framework.views import Response, status
 
-from products.models import Product
-from products.permissions import IsSeller
-from products.serializers import CreateProductSerializer, ListProductSerializer
+from .models import Product
+from .serializers import ProductSerializerDetailed, ProductSerializerGeneral
+from .permissions import IsProductOwner, IsSellerAndAuthenticated
+from .mixins import SerializerByMethodMixin
 
 
-class ProductView(SerializerByMethodMixin, ListCreateAPIView):
-    queryset = Product.objects.all()
-
+class ProductView(SerializerByMethodMixin, generics.ListCreateAPIView):
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsSeller]
+    permission_classes = [IsSellerAndAuthenticated]
 
-    serializer_map = {
-        "GET": ListProductSerializer,
-        "POST": CreateProductSerializer,
-    }
-
-    def perform_create(self, serializer: CreateProductSerializer):
-        serializer.save(seller=self.request.user)
-
-
-class ProductIdView(SerializerByMethodMixin, RetrieveUpdateAPIView):
     queryset = Product.objects.all()
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsSeller]
-
     serializer_map = {
-        "GET": ListProductSerializer,
-        "PATCH": CreateProductSerializer,
+        'GET': ProductSerializerGeneral,
+        'POST': ProductSerializerDetailed,
     }
+    
+    def perform_create(self, serializer):
+        seller = self.request.user
+        serializer.save(seller=seller)
+
+
+class ProductDetailView(generics.RetrieveUpdateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsProductOwner]
+    
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializerDetailed
+
+
+
+
+

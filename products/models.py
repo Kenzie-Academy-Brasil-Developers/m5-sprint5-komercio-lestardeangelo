@@ -1,18 +1,12 @@
-from uuid import uuid4
-from django.core.validators import MinValueValidator
-
 from django.db import models
-
+from users.models import Account
+import uuid 
 
 class Product(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     description = models.TextField()
-    price = models.FloatField(validators=[MinValueValidator(0.01)])
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
 
-    seller = models.ForeignKey(
-        to="accounts.Account",
-        on_delete=models.CASCADE,
-        related_name="products",
-    )
+    seller = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='products')
