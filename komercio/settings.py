@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-z$!_7w3-220v4$wn50s0#r2(8^o1%7r#mb*t657m60yv4!=ocl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['deploy-sp5.herokuapp.com/', 'localhost']
+ALLOWED_HOSTS = ['git.heroku.com/deploy-sp5.git', 'localhost']
 
 
 # Application definition
